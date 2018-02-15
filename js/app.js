@@ -25,10 +25,19 @@ function shuffle(array) {
     return array;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const cards = document.getElementsByClassName('card')
-  console.log(cards)
-})
+
+const allCards = Array.from(document.getElementsByClassName('card'))
+
+const showCard = (e, card) => {
+  e.preventDefault()
+  if (card.classList.contains('match')) return
+  if (card.classList.contains('open')) return
+  if (card.classList.contains('show')) return
+  
+  card.classList.add('open', 'show')
+}
+
+allCards.forEach(card => card.addEventListener('click', (e) => showCard(e, card)))
 
 /*
  * set up the event listener for a card. If a card is clicked:
