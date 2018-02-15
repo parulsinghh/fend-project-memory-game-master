@@ -25,6 +25,11 @@ function shuffle(array) {
     return array;
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.getElementsByClassName('card')
+  console.log(cards)
+})
+
 /*
  * set up the event listener for a card. If a card is clicked:
  *  - display the card's symbol (put this functionality in another function that you call from this one)
