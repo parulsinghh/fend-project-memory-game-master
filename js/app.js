@@ -1,7 +1,34 @@
 /*
  * Create a list that holds all of your cards
- */
+*/
 
+const deckNode = document.getElementById('deck')
+
+function duplicateElements(array, times) {
+  return array.reduce((res, current) => {
+      return res.concat(Array(times).fill(current));
+  }, []);
+}
+
+const cardTypes = duplicateElements([
+  'diamond',
+  'paper-plane-o',
+  'anchor',
+  'bolt',
+  'cube',
+  'leaf',
+  'bicycle',
+  'bomb'
+], 2)
+
+const createCard = (className) => {
+  const cardElement = document.createElement('li')
+  cardElement.className =  `card ${className}`
+  const icon = document.createElement('i')
+  icon.className = `fa fa-${className}`
+  cardElement.appendChild(icon)
+  return cardElement
+}
 
 /*
  * Display the cards on the page
@@ -25,19 +52,79 @@ function shuffle(array) {
     return array;
 }
 
+const cards = []
+// const randomCardTypes = shuffle(cardTypes)
 
-const allCards = Array.from(document.getElementsByClassName('card'))
+cardTypes.forEach((type) => {
+  cards.push({
+    type,
+    shown: false,
+    locked: false,
+    element: createCard(type)
+  })
+})
+
+let openCards = []
+
+cards.forEach(card => {
+  deckNode.appendChild(card.element)
+})
+
+const openCard = (card) => {
+  card.element.classList.add('open', 'show')
+  card.shown = true
+  openCards.push(card)
+}
+
+const canMatch = () => 
+  openCards.filter(card => card.shown).length >= 2
+
+const matchCard = () => {
+  const currentOpenCards = openCards.filter(card => card.shown)
+  const isMatch = currentOpenCards.every(card => {
+    return currentOpenCards[0].type === card.type
+  })
+
+  if (isMatch) {
+    currentOpenCards.forEach(card => {
+      card.element.classList.add('match')
+      card.shown = false
+    })
+
+    return 
+  }
+
+  lockCards(currentOpenCards)
+}
+
+const lockCards = (currentOpenCards) => {
+  currentOpenCards.forEach(card => {
+    card.locked = true
+    card.shown = false
+    card.element.classList.add('unmatch')
+    setTimeout(() => {
+      card.element.classList.remove('open', 'show', 'unmatch')
+    }, 2000)
+  })
+
+  openCards = openCards.filter(card => !card.locked) 
+}
+
+const tryMatch = () => {
+  if (canMatch()) matchCard()
+}
 
 const showCard = (e, card) => {
   e.preventDefault()
-  if (card.classList.contains('match')) return
-  if (card.classList.contains('open')) return
-  if (card.classList.contains('show')) return
+  if (card.shown) return 
+  if (openCards.includes(card)) return
+
+  openCard(card)
   
-  card.classList.add('open', 'show')
+  setTimeout(tryMatch, 1000)
 }
 
-allCards.forEach(card => card.addEventListener('click', (e) => showCard(e, card)))
+cards.forEach(card => card.element.addEventListener('click', (e) => showCard(e, card)))
 
 /*
  * set up the event listener for a card. If a card is clicked:
