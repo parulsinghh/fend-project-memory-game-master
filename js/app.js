@@ -1,12 +1,14 @@
 /*
- * Create a list that holds all of your cards
+ * Initialize game states
 */
 
 const cards = [];
 let moves = 0;
+let stars = 3;
 let openCards = [];
 
-const getDOMNodeById = id => document.getElementById(id)
+/* Get document node by id */
+const getDOMNodeById = id => document.getElementById(id);
 
 const duplicateElements = (array, times) =>
   array.reduce((res, current) => res.concat(Array(times).fill(current)), []);
@@ -15,10 +17,10 @@ const duplicateElements = (array, times) =>
 const deckNode = getDOMNodeById('deck');
 
 /* Get moves node */
-const movesNode = getDOMNodeById('moves')
+const movesNode = getDOMNodeById('moves');
 
 /* Get reset node */
-const resetNode = getDOMNodeById('reset')
+const resetNode = getDOMNodeById('reset');
 
 /* All card types */
 const cardTypes = duplicateElements([
@@ -42,57 +44,37 @@ const createCard = (className) => {
   
   cardElement.appendChild(icon);
   return cardElement;
-}
+};
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+  var currentIndex = array.length, temporaryValue, randomIndex;
 
-    while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
+  while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+  }
 
-    return array;
+  return array;
 };
 
-// Shuffle cards and create DOM element with additional meta data
-const initCards = () => {
-  deckNode.innerHTML = null
-
-  shuffle(cardTypes).forEach((type) => {
-    const element = createCard(type);
-    const cardAttrs = {
-      type,
-      element,
-      shown: false,
-      locked: false
-    };
-
-    element.addEventListener('click', (e) => showCard(e, cardAttrs))
-    cards.push(cardAttrs);
-    deckNode.appendChild(element);
-  })
-}
-
-initCards()
-
 const openCard = (card) => {
-  card.element.classList.add('open', 'show')
-  card.shown = true
-  openCards.push(card)
-}
+  card.element.classList.add('open', 'show');
+  card.shown = true;
+  openCards.push(card);
+};
 
 const matchCard = () => {
-  moves += 1
-  movesNode.innerHTML = moves 
-  const currentOpenCards = openCards.filter(card => card.shown)
+  moves += 1;
+  movesNode.innerHTML = moves;
+  
+  const currentOpenCards = openCards.filter(card => card.shown);
   const isMatch = currentOpenCards.every(card => {
     return currentOpenCards[0].type === card.type
-  })
+  });
 
   if (isMatch) {
     currentOpenCards.forEach(card => {
@@ -122,27 +104,44 @@ const lockCards = (currentOpenCards) => {
 const canMatch = () => 
   openCards.filter(card => card.shown).length >= 2
 
-const tryMatch = () => {
-  if (canMatch()) matchCard()
-}
-
-const showCard = (e, card) => {
+const revealCard = (e, card) => {
   e.preventDefault()
   if (card.shown) return 
   if (openCards.includes(card)) return
 
   openCard(card)
-  tryMatch()
+  if (canMatch()) matchCard()
 }
+
+// Render game board
+const renderGame = () => {
+  deckNode.innerHTML = null
+
+  shuffle(cardTypes).forEach((type) => {
+    const element = createCard(type);
+    const cardAttrs = {
+      type,
+      element,
+      shown: false,
+      locked: false
+    };
+
+    element.addEventListener('click', (e) => revealCard(e, cardAttrs));
+    cards.push(cardAttrs);
+    deckNode.appendChild(element);
+  })
+};
 
 /* Resets game */
 const resetGame = () => {
   openCards = []
   moves = 0
   movesNode.innerHTML = 0
-  initCards()
+  renderGame()
 }
 
+// Initialize and render game
+document.addEventListener('DOMContentLoaded', renderGame)
 resetNode.addEventListener('click', resetGame)
 
 /*
