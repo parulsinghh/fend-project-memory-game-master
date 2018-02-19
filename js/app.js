@@ -4,7 +4,7 @@
 
 const cards = [];
 let moves = 0;
-let stars = 3;
+let startTime = new Date().getTime();
 let openCards = [];
 
 /* Get document node by id */
@@ -22,6 +22,14 @@ const movesNode = getDOMNodeById('moves');
 /* Get reset node */
 const resetNode = getDOMNodeById('reset');
 
+/* Get stars node */
+const starsNode = getDOMNodeById('stars');
+
+/* Get timer node */
+const timerNode = getDOMNodeById('timer')
+
+let stars = duplicateElements(['star'], 3);
+
 /* All card types */
 const cardTypes = duplicateElements([
   'diamond',
@@ -35,7 +43,7 @@ const cardTypes = duplicateElements([
 ], 2);
 
 /* Creates a card element */
-const createCard = (className) => {
+const createElement = (className) => {
   const cardElement = document.createElement('li');
   cardElement.className =  `card ${className}`;
   
@@ -71,6 +79,22 @@ const matchCard = () => {
   moves += 1;
   movesNode.innerHTML = moves;
   
+  switch (moves) {
+    case 5: 
+      stars.pop()
+      renderStars()
+      break
+    case 8: 
+      stars.pop()
+      renderStars()
+      break
+    case 10: 
+      stars.pop()
+      renderStars()
+      gameLost()
+      break
+  }
+
   const currentOpenCards = openCards.filter(card => card.shown);
   const isMatch = currentOpenCards.every(card => {
     return currentOpenCards[0].type === card.type
@@ -80,6 +104,7 @@ const matchCard = () => {
     currentOpenCards.forEach(card => {
       card.element.classList.add('match')
       card.shown = false
+      card.match = true
     })
 
     return 
@@ -89,39 +114,96 @@ const matchCard = () => {
 }
 
 const lockCards = (currentOpenCards) => {
-  currentOpenCards.forEach(card => {
+  currentOpenCards.forEach((card, index) => {
     card.locked = true
+    card.match = false
     card.shown = false
     card.element.classList.add('unmatch')
     setTimeout(() => {
       card.element.classList.remove('open', 'show', 'unmatch')
-    }, 2000)
+    }, 500)
   })
 
-  openCards = openCards.filter(card => !card.locked) 
+  openCards = openCards.filter(card => !currentOpenCards.includes(card))
 }
 
 const canMatch = () => 
   openCards.filter(card => card.shown).length >= 2
 
+const gameFinished = () => 
+  openCards.length && 
+    cards.length === openCards.length &&
+    openCards.every(card => card.match);
+
+const calculateGameTime = () => {
+  const endTime = new Date().getTime()
+  const distance = endTime - startTime 
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  return `${seconds} seconds`
+}
+
+const gameLost = () => 
+   swal({
+    title: "You lost!",
+    text: `You took ${calculateGameTime()}, ${moves} moves and used all your stars`,
+    icon: "warning",
+    button: "Play again!"
+  }).then((value) => {
+    resetGame();
+  });
+
+// Check game status on each click
+const showScoreCard = () => {
+  swal({
+    title: "Congratulations! You won!",
+    text: `You took ${calculateGameTime()}, ${moves} moves and used ${stars} stars`,
+    icon: "success",
+    button: "Play again!"
+  }).then((value) => {
+    resetGame();
+  });
+}
+
 const revealCard = (e, card) => {
   e.preventDefault()
   if (card.shown) return 
   if (openCards.includes(card)) return
-
+    
   openCard(card)
   if (canMatch()) matchCard()
+  if (gameFinished()) showScoreCard()
+}
+
+const timeToSeconds = (time) => 
+  Math.floor((time % (1000 * 60)) / 1000)
+
+const startTimer = () => 
+  setInterval(() => {
+    const now = new Date().getTime()
+    const distance = now - startTime
+    timerNode.innerHTML = `${timeToSeconds(distance)}s`
+  }, 1000)
+
+const renderStars = () => {
+   starsNode.innerHTML = null
+   stars.forEach(star => {
+    const element = createElement(star)
+    starsNode.appendChild(element);
+  })
 }
 
 // Render game board
 const renderGame = () => {
   deckNode.innerHTML = null
+  startTime = new Date().getTime()
 
-  shuffle(cardTypes).forEach((type) => {
-    const element = createCard(type);
+  cardTypes.forEach((type, index) => {
+    const element = createElement(type);
     const cardAttrs = {
+      index,
       type,
       element,
+      match: false,
       shown: false,
       locked: false
     };
@@ -130,12 +212,16 @@ const renderGame = () => {
     cards.push(cardAttrs);
     deckNode.appendChild(element);
   })
+
+  renderStars()
+  startTimer()
 };
 
 /* Resets game */
 const resetGame = () => {
   openCards = []
   moves = 0
+  stars = duplicateElements(['star'], 3)
   movesNode.innerHTML = 0
   renderGame()
 }
