@@ -6,6 +6,7 @@
     <meta name="description" content="">
     <link rel="stylesheet prefetch" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
     <link rel="stylesheet prefetch" href="https://fonts.googleapis.com/css?family=Coda">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link rel="stylesheet" href="css/animate.css">
     <link rel="stylesheet" href="css/app.css">
 </head>
@@ -17,10 +18,7 @@
         </header>
 
         <section class="score-panel">
-        	<ul class="stars">
-        		<li><i class="fa fa-star"></i></li>
-        		<li><i class="fa fa-star"></i></li>
-        		<li><i class="fa fa-star"></i></li>
+        	<ul class="stars" id="stars">
         	</ul>
 
         	<span class="moves" id="moves">0</span> Moves
@@ -28,6 +26,8 @@
             <div class="restart" id="reset"> 
         	   <i class="fa fa-repeat"></i>
         	</div>
+
+            <span class="timer" id="timer">0s</span>
         </section>
 
         <ul class="deck" id="deck"></ul>
