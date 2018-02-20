@@ -1,20 +1,14 @@
 # Memory Game Project
 
-## Table of Contents
+![img](./img/app.png)
 
-* [Instructions](#instructions)
-* [Contributing](#contributing)
+## Code Structure
 
-## Instructions
+- css
+- img
+- js
+- index.html
 
-The starter project has some HTML and CSS styling to display a static version of the Memory Game project. You'll need to convert this project from a static project to an interactive one. This will require modifying the HTML and CSS files, but primarily the JavaScript file.
+## Running locally
 
-To get started, open `js/app.js` and start building out the app's functionality
-
-For specific, detailed instructions, look at the project instructions in the [Udacity Classroom](https://classroom.udacity.com/me).
-
-## Contributing
-
-This repository is the starter code for _all_ Udacity students. Therefore, we most likely will not accept pull requests.
-
-For details, check out [CONTRIBUTING.md](CONTRIBUTING.md).
+Please open up [index.html](index.html) in your browser to run the app
