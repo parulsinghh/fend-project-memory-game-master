@@ -10,8 +10,8 @@ html {
 
 html,
 body {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0;
   padding: 0;
 }
@@ -38,7 +38,7 @@ h1 {
 */
 
 .deck {
-  width: 660px;
+  max-width: 660px;
   min-height: 680px;
   background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%);
   padding: 32px;
@@ -120,4 +120,14 @@ h1 {
 .score-panel .restart {
   float: right;
   cursor: pointer;
+}
+
+
+@media only screen and (max-width: 400px) {
+  .deck .card {
+    margin-bottom: 20px;
+  }
+  .fa {
+    margin: 5px;
+  }
 }
