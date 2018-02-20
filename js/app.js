@@ -144,16 +144,15 @@ const updateStars = () => {
   }
 };
 
-/* Get a list of current open cards */
-
-
 /* Matches two open cards currently in open cards */
 const matchCard = () => {
   updateMoves();
   updateStars();
 
+  /* Get a list of current open cards */
   const currentOpenCards = openCards.filter(card => card.shown);
 
+  /* Check to see if both open cards match */
   const isMatch = currentOpenCards.every(
     card => currentOpenCards[0].type === card.type
   );
