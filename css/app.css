@@ -22,10 +22,9 @@ body {
 }
 
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
 }
 
 h1 {
@@ -44,10 +43,9 @@ h1 {
   padding: 32px;
   border-radius: 10px;
   box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.5);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(4, 125px); 
+  grid-gap: 25px;
   margin: 0 0 3em;
 }
 
@@ -59,9 +57,10 @@ h1 {
   color: #fff;
   border-radius: 8px;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr;
   align-items: center;
+  justify-items: center;
   box-shadow: 5px 2px 20px 0 rgba(46, 61, 73, 0.5);
   animation-duration: 1s;
   animation-fill-mode: both;
@@ -97,6 +96,9 @@ h1 {
   text-align: left;
   width: 345px;
   margin-bottom: 10px;
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .score-panel .stars {
@@ -108,7 +110,11 @@ h1 {
 
 .score-panel .stars li {
   list-style: none;
-  display: inline-block;
+  display: flex;
+}
+.score-panel .moves {
+  display: flex;
+  justify-content: space-between;
 }
 
 .score-panel .timer {
@@ -118,16 +124,12 @@ h1 {
 }
 
 .score-panel .restart {
-  float: right;
   cursor: pointer;
 }
 
-
-@media only screen and (max-width: 400px) {
-  .deck .card {
-    margin-bottom: 20px;
-  }
-  .fa {
-    margin: 5px;
+@media only screen and (max-width: 414px) {
+  .deck {
+    grid-template-columns: repeat(2, 125px); 
+    box-shadow: none;
   }
 }
