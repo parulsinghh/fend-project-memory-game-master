@@ -1,7 +1,4 @@
-/*
- * Initialize game states
-*/
-
+/* Initialize game states */
 const cards = [];
 let moves = 0;
 let startTime = new Date().getTime();
@@ -10,8 +7,9 @@ let openCards = [];
 /* Get document node by id */
 const getDOMNodeById = id => document.getElementById(id);
 
+/* Duplicate array items */
 const duplicateElements = (array, times) =>
-  array.reduce((res, current) => res.concat(Array(times).fill(current)), []);
+  array.reduce((acc, current) => acc.concat(Array(times).fill(current)), []);
 
 /* Get deck DOM node */
 const deckNode = getDOMNodeById('deck');
@@ -26,217 +24,235 @@ const resetNode = getDOMNodeById('reset');
 const starsNode = getDOMNodeById('stars');
 
 /* Get timer node */
-const timerNode = getDOMNodeById('timer')
+const timerNode = getDOMNodeById('timer');
 
+/* Initialize 3 stars */
 let stars = duplicateElements(['star'], 3);
 
-/* All card types */
-const cardTypes = duplicateElements([
-  'diamond',
-  'paper-plane-o',
-  'anchor',
-  'bolt',
-  'cube',
-  'leaf',
-  'bicycle',
-  'bomb'
-], 2);
+/* Declare all card types and duplicate */
+const cardTypes = duplicateElements(
+  [
+    'diamond',
+    'paper-plane-o',
+    'anchor',
+    'bolt',
+    'cube',
+    'leaf',
+    'bicycle',
+    'bomb'
+  ],
+  2
+);
 
-/* Creates a card element */
-const createElement = (className) => {
-  const cardElement = document.createElement('li');
-  cardElement.className =  `card ${className}`;
-  
-  const icon = document.createElement('i');
-  icon.className = `fa fa-${className}`;
-  
-  cardElement.appendChild(icon);
+/* Create a dom element given element name and a class name */
+const createElement = (element, className = '') => {
+  const cardElement = document.createElement(element);
+  cardElement.className = className;
+  return cardElement;
+};
+
+/* Creates a card element given a class name */
+const createCard = className => {
+  const cardElement = createElement('li', `card ${className}`);
+  const iconElement = createElement('i', `fa fa-${className}`);
+
+  cardElement.appendChild(iconElement);
   return cardElement;
 };
 
 // Shuffle function from http://stackoverflow.com/a/2450976
-function shuffle(array) {
-  var currentIndex = array.length, temporaryValue, randomIndex;
+const shuffle = array => {
+  var currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
 
   while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
   }
 
   return array;
 };
 
-const openCard = (card) => {
+/* Resets game */
+const resetGame = () => {
+  openCards = [];
+  moves = 0;
+  stars = duplicateElements(['star'], 3);
+  movesNode.innerHTML = 0;
+  renderGame();
+};
+
+/* Add a event listener to reset icon */
+resetNode.addEventListener('click', resetGame);
+
+/* Renders game lost popup if all stars have been used */
+const gameLost = () =>
+  swal({
+    title: 'You lost!',
+    text: `You took ${calculateGameTime()}, ${moves} moves and have ${stars} stars`,
+    icon: 'warning',
+    button: 'Play again!'
+  }).then(value => {
+    resetGame();
+  });
+
+/* Renders a final score card popup when game is finished */
+const showScoreCard = () => {
+  swal({
+    title: 'Congratulations! You won!',
+    text: `You took ${calculateGameTime()}, ${moves} moves and used ${stars} stars`,
+    icon: 'success',
+    button: 'Play again!'
+  }).then(value => {
+    resetGame();
+  });
+};
+
+/* Adds a card to list of open cards when clicked */
+const openCard = card => {
   card.element.classList.add('open', 'show');
   card.shown = true;
   openCards.push(card);
 };
 
-const matchCard = () => {
+/* Updates moves counter */
+const updateMoves = () => {
   moves += 1;
   movesNode.innerHTML = moves;
-  
-  switch (moves) {
-    case 5: 
-      stars.pop()
-      renderStars()
-      break
-    case 8: 
-      stars.pop()
-      renderStars()
-      break
-    case 10: 
-      stars.pop()
-      renderStars()
-      gameLost()
-      break
-  }
+};
 
-  const currentOpenCards = openCards.filter(card => card.shown);
-  const isMatch = currentOpenCards.every(card => {
-    return currentOpenCards[0].type === card.type
-  });
+/* Updates stars list */
+const updateStars = () => {
+  switch (moves) {
+    case 5:
+      stars.pop();
+      renderStars();
+      break;
+    case 8:
+      stars.pop();
+      renderStars();
+      break;
+    case 10:
+      stars.pop();
+      renderStars();
+      gameLost();
+      break;
+  }
+};
+
+/* Get a list of current open cards */
+const currentOpenCards = () => openCards.filter(card => card.shown);
+
+/* Matches two open cards currently in open cards */
+const matchCard = () => {
+  updateMoves();
+  updateStars();
+
+  const isMatch = currentOpenCards().every(
+    card => currentOpenCards()[0].type === card.type
+  );
 
   if (isMatch) {
-    currentOpenCards.forEach(card => {
-      card.element.classList.add('match')
-      card.shown = false
-      card.match = true
-    })
+    currentOpenCards().forEach(card => {
+      card.element.classList.add('match');
+      card.shown = false;
+      card.match = true;
+    });
 
-    return 
+    return;
   }
 
-  lockCards(currentOpenCards)
-}
+  lockCards();
+};
 
-const lockCards = (currentOpenCards) => {
-  currentOpenCards.forEach((card, index) => {
-    card.locked = true
-    card.match = false
-    card.shown = false
-    card.element.classList.add('unmatch')
+/* Locks current open cards if they don't match */
+const lockCards = () => {
+  currentOpenCards().forEach((card, index) => {
+    card.match = false;
+    card.shown = false;
+    card.element.classList.add('unmatch');
+
     setTimeout(() => {
-      card.element.classList.remove('open', 'show', 'unmatch')
-    }, 500)
-  })
+      card.element.classList.remove('open', 'show', 'unmatch');
+    }, 500);
+  });
 
-  openCards = openCards.filter(card => !currentOpenCards.includes(card))
-}
+  openCards = openCards.filter(card => !currentOpenCards().includes(card));
+};
 
-const canMatch = () => 
-  openCards.filter(card => card.shown).length >= 2
+/* Checks if cards can be matched i.e. >= 2 open cards */
+const canMatch = () => openCards.filter(card => card.shown).length >= 2;
 
-const gameFinished = () => 
-  openCards.length && 
-    cards.length === openCards.length &&
-    openCards.every(card => card.match);
+/* Checks if all cards have been matched */
+const isGameFinished = () =>
+  openCards.length &&
+  cards.length === openCards.length &&
+  openCards.every(card => card.match);
 
+/* Calculates how long player took to match all cards */
 const calculateGameTime = () => {
-  const endTime = new Date().getTime()
-  const distance = endTime - startTime 
+  const endTime = new Date().getTime();
+  const distance = endTime - startTime;
   const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-  return `${seconds} seconds`
-}
+  return `${seconds} seconds`;
+};
 
-const gameLost = () => 
-   swal({
-    title: "You lost!",
-    text: `You took ${calculateGameTime()}, ${moves} moves and used all your stars`,
-    icon: "warning",
-    button: "Play again!"
-  }).then((value) => {
-    resetGame();
-  });
-
-// Check game status on each click
-const showScoreCard = () => {
-  swal({
-    title: "Congratulations! You won!",
-    text: `You took ${calculateGameTime()}, ${moves} moves and used ${stars} stars`,
-    icon: "success",
-    button: "Play again!"
-  }).then((value) => {
-    resetGame();
-  });
-}
-
+/* Reveals a locked card when clicked */
 const revealCard = (e, card) => {
-  e.preventDefault()
-  if (card.shown) return 
-  if (openCards.includes(card)) return
-    
-  openCard(card)
-  if (canMatch()) matchCard()
-  if (gameFinished()) showScoreCard()
-}
+  e.preventDefault();
+  if (card.shown) return;
+  if (openCards.includes(card)) return;
 
-const timeToSeconds = (time) => 
-  Math.floor((time % (1000 * 60)) / 1000)
+  openCard(card);
+  if (canMatch()) matchCard();
+  if (isGameFinished()) showScoreCard();
+};
 
-const startTimer = () => 
+/* Starts a game timer */
+const renderTimer = () =>
   setInterval(() => {
-    const now = new Date().getTime()
-    const distance = now - startTime
-    timerNode.innerHTML = `${timeToSeconds(distance)}s`
-  }, 1000)
+    const now = new Date().getTime();
+    const distance = now - startTime;
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    timerNode.innerHTML = `${seconds}s`;
+  }, 1000);
 
+/* Appends a list of stars inside DOM */
 const renderStars = () => {
-   starsNode.innerHTML = null
-   stars.forEach(star => {
-    const element = createElement(star)
-    starsNode.appendChild(element);
-  })
-}
+  starsNode.innerHTML = null;
+  stars.forEach(star => {
+    const starElement = createElement('span', `fa fa-${star}`);
+    starsNode.appendChild(starElement);
+  });
+};
 
-// Render game board
+/* Renders game board with stars and timer */
 const renderGame = () => {
-  deckNode.innerHTML = null
-  startTime = new Date().getTime()
+  deckNode.innerHTML = null;
+  startTime = new Date().getTime();
 
   cardTypes.forEach((type, index) => {
-    const element = createElement(type);
+    const element = createCard(type);
     const cardAttrs = {
       index,
       type,
       element,
       match: false,
-      shown: false,
-      locked: false
+      shown: false
     };
 
-    element.addEventListener('click', (e) => revealCard(e, cardAttrs));
+    element.addEventListener('click', e => revealCard(e, cardAttrs));
     cards.push(cardAttrs);
     deckNode.appendChild(element);
-  })
+  });
 
-  renderStars()
-  startTimer()
+  renderStars();
+  renderTimer();
 };
 
-/* Resets game */
-const resetGame = () => {
-  openCards = []
-  moves = 0
-  stars = duplicateElements(['star'], 3)
-  movesNode.innerHTML = 0
-  renderGame()
-}
-
-// Initialize and render game
-document.addEventListener('DOMContentLoaded', renderGame)
-resetNode.addEventListener('click', resetGame)
-
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
- */
+/* Initializes and renders game */
+document.addEventListener('DOMContentLoaded', renderGame);
