@@ -4,10 +4,30 @@ let moves = 0;
 let startTime = new Date().getTime();
 let openCards = [];
 
+// Shuffle function from http://stackoverflow.com/a/2450976
+const shuffle = array => {
+  var currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
+
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+};
+
 /* Get document node by id */
 const getDOMNodeById = id => document.getElementById(id);
 
-/* Duplicate array items */
+/* 
+  Duplicate array items 
+  https://stackoverflow.com/a/33305186
+*/
 const duplicateElements = (array, times) =>
   array.reduce((acc, current) => acc.concat(Array(times).fill(current)), []);
 
@@ -17,14 +37,8 @@ const deckNode = getDOMNodeById('deck');
 /* Get moves node */
 const movesNode = getDOMNodeById('moves');
 
-/* Get reset node */
-const resetNode = getDOMNodeById('reset');
-
 /* Get stars node */
 const starsNode = getDOMNodeById('stars');
-
-/* Get timer node */
-const timerNode = getDOMNodeById('timer');
 
 /* Initialize 3 stars */
 let stars = duplicateElements(['star'], 3);
@@ -60,23 +74,6 @@ const createCard = className => {
   return cardElement;
 };
 
-// Shuffle function from http://stackoverflow.com/a/2450976
-const shuffle = array => {
-  var currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
-
-  while (currentIndex !== 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-};
-
 /* Resets game */
 const resetGame = () => {
   openCards = [];
@@ -87,10 +84,10 @@ const resetGame = () => {
 };
 
 /* Add a event listener to reset icon */
-resetNode.addEventListener('click', resetGame);
+getDOMNodeById('reset').addEventListener('click', resetGame);
 
 const statusText = () => 
-  `You took ${calculateGameTime()}, ${moves} moves and have ${stars.length} stars left`
+  `You took ${timeElapsed()}, ${moves} moves and have ${stars.length} stars left`
 
 /* Renders game lost popup if all stars have been used */
 const gameLost = () =>
@@ -194,11 +191,12 @@ const isGameFinished = () =>
   openCards.every(card => card.match);
 
 /* Calculates how long player took to match all cards */
-const calculateGameTime = () => {
+const timeElapsed = () => {
   const endTime = new Date().getTime();
   const distance = endTime - startTime;
-  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-  return `${seconds} seconds`;
+  const seconds = Math.floor((distance / 1000) % 60);
+  const minutes = Math.floor((distance / 1000 / 60) % 60);
+  return minutes ? `${minutes}m:${seconds}s` : `${seconds}s`;
 };
 
 /* Reveals a locked card when clicked */
@@ -215,10 +213,7 @@ const revealCard = (e, card) => {
 /* Starts a game timer */
 const renderTimer = () =>
   setInterval(() => {
-    const now = new Date().getTime();
-    const distance = now - startTime;
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    timerNode.innerHTML = `${seconds}s`;
+    getDOMNodeById('timer').innerHTML = timeElapsed();
   }, 1000);
 
 /* Appends a list of stars inside DOM */
@@ -235,7 +230,7 @@ const renderGame = () => {
   deckNode.innerHTML = null;
   startTime = new Date().getTime();
 
-  cardTypes.forEach((type, index) => {
+  shuffle(cardTypes).forEach((type, index) => {
     const element = createCard(type);
     const cardAttrs = {
       index,
