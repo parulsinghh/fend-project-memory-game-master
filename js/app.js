@@ -128,15 +128,15 @@ const updateMoves = () => {
 /* Updates stars list */
 const updateStars = () => {
   switch (moves) {
-    case 5:
+    case 12:
       stars.pop();
       renderStars();
       break;
-    case 8:
+    case 24:
       stars.pop();
       renderStars();
       break;
-    case 10:
+    case 36:
       stars.pop();
       renderStars();
       gameLost();
@@ -145,19 +145,21 @@ const updateStars = () => {
 };
 
 /* Get a list of current open cards */
-const currentOpenCards = () => openCards.filter(card => card.shown);
+
 
 /* Matches two open cards currently in open cards */
 const matchCard = () => {
   updateMoves();
   updateStars();
 
-  const isMatch = currentOpenCards().every(
-    card => currentOpenCards()[0].type === card.type
+  const currentOpenCards = openCards.filter(card => card.shown);
+
+  const isMatch = currentOpenCards.every(
+    card => currentOpenCards[0].type === card.type
   );
 
   if (isMatch) {
-    currentOpenCards().forEach(card => {
+    currentOpenCards.forEach(card => {
       card.element.classList.add('match');
       card.shown = false;
       card.match = true;
@@ -166,12 +168,12 @@ const matchCard = () => {
     return;
   }
 
-  lockCards();
+  lockCards(currentOpenCards);
 };
 
 /* Locks current open cards if they don't match */
-const lockCards = () => {
-  currentOpenCards().forEach((card, index) => {
+const lockCards = (currentOpenCards) => {
+  currentOpenCards.forEach((card, index) => {
     card.match = false;
     card.shown = false;
     card.element.classList.add('unmatch');
@@ -181,7 +183,7 @@ const lockCards = () => {
     }, 500);
   });
 
-  openCards = openCards.filter(card => !currentOpenCards().includes(card));
+  openCards = openCards.filter(card => !currentOpenCards.includes(card));
 };
 
 /* Checks if cards can be matched i.e. >= 2 open cards */
