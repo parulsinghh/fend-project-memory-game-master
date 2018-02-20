@@ -89,27 +89,26 @@ const resetGame = () => {
 /* Add a event listener to reset icon */
 resetNode.addEventListener('click', resetGame);
 
+const statusText = () => 
+  `You took ${calculateGameTime()}, ${moves} moves and have ${stars.length} stars left`
+
 /* Renders game lost popup if all stars have been used */
 const gameLost = () =>
   swal({
     title: 'You lost!',
-    text: `You took ${calculateGameTime()}, ${moves} moves and have ${stars} stars`,
+    text: statusText(),
     icon: 'warning',
     button: 'Play again!'
-  }).then(value => {
-    resetGame();
-  });
+  }).then(() => resetGame());
 
 /* Renders a final score card popup when game is finished */
 const showScoreCard = () => {
   swal({
     title: 'Congratulations! You won!',
-    text: `You took ${calculateGameTime()}, ${moves} moves and used ${stars} stars`,
+    text: statusText(),
     icon: 'success',
     button: 'Play again!'
-  }).then(value => {
-    resetGame();
-  });
+  }).then(() => resetGame());
 };
 
 /* Adds a card to list of open cards when clicked */
