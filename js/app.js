@@ -1,5 +1,5 @@
 /* Initialize game states */
-const cards = [];
+let cards = [];
 let moves = 0;
 let startTime = new Date().getTime();
 let openCards = [];
@@ -76,6 +76,7 @@ const createCard = className => {
 
 /* Resets game */
 const resetGame = () => {
+  cards = [];
   openCards = [];
   moves = 0;
   stars = duplicateElements(['star'], 3);
@@ -87,7 +88,8 @@ const resetGame = () => {
 getDOMNodeById('reset').addEventListener('click', resetGame);
 
 const statusText = () => 
-  `You took ${timeElapsed()}, ${moves} moves and have ${stars.length} stars left`
+  `You took ${timeElapsed()}, ${moves} moves and have ` +
+  `${stars.length} ${stars.length === 1 ? 'star' : 'stars'} left`
 
 /* Renders game lost popup if all stars have been used */
 const gameLost = () =>
@@ -125,10 +127,6 @@ const updateMoves = () => {
 const updateStars = () => {
   switch (moves) {
     case 12:
-      stars.pop();
-      renderStars();
-      break;
-    case 24:
       stars.pop();
       renderStars();
       break;
